@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Món Quà Bí Mật</title>
+    <style>
+        /* --- CÀI ĐẶT CHUNG --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Không cho cuộn trang */
+        }
+
+        /* --- MÀN HÌNH 1: KHÓA SỐ --- */
+        #screen-1 {
+            width: 100%;
+            height: 100%;
+            /* Thay ảnh nền 1 ở đây */
+            background: url('nen1.jpg') no-repeat center center/cover; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Bảng mật khẩu kính mờ (Glassmorphism) */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        #password-display {
+            width: 100%;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 24px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .key {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .key:hover {
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px #fff;
+        }
+
+        .btn-enter {
+            grid-column: span 3;
+            width: 100%;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            color: white;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px #ff00cc;
+        }
+
+        /* Hiệu ứng khi nhập đúng: Phát sáng và toả ra */
+        .correct-pass-anim {
+            animation: burstEffect 1s forwards;
+        }
+
+        @keyframes burstEffect {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+            50% { transform: scale(1.2); box-shadow: 0 0 50px 20px rgba(255,255,255,0.8); background: rgba(255,255,255,0.9); }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* --- MÀN HÌNH 2: HỘP QUÀ --- */
+        #screen-2 {
+            display: none; /* Ẩn ban đầu */
+            width: 100%;
+            height: 100%;
+            /* Thay ảnh nền 2 ở đây */
+            background: url('nen2.jpg') no-repeat center center/cover;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 9;
+        }
+
+        /* Nút mở quà phát sáng */
+        #open-gift-btn {
+            padding: 20px 40px;
+            font-size: 24px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px #ff4757;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 71, 87, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        }
+
+        /* Bảng trang trí (Modal) */
+        #gift-modal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 5px solid #ffcccb;
+            box-shadow: 0 0 50px rgba(255, 192, 203, 0.8);
+            animation: popup 0.5s ease-out;
+        }
+
+        @keyframes popup {
+            from { transform: translate(-50%, -50%) scale(0); }
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .decorations {
+            position: relative;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .sticker {
+            width: 80px; /* Chỉnh kích thước gấu/nơ */
+            height: auto;
+        }
+
+        .main-gif {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px dashed #ff4757;
+        }
+
+        .next-btn {
+            background: linear-gradient(to right, #11998e, #38ef7d);
+            border: none;
+            padding: 10px 30px;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        /* --- MÀN HÌNH 3: VIDEO --- */
+        #screen-3 {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer; /* Con trỏ để biết cần bấm */
+        }
+
+        #click-hint {
+            position: absolute;
+            font-size: 20px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink { 50% { opacity: 0; } }
+
+        #video-container {
+            display: none; /* Ẩn cho đến khi click */
+            width: 80%;
+            max-width: 800px;
+            background: #222;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 30px rgba(255,255,255,0.5);
+        }
+
+        video {
+            width: 100%;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="screen-1">
+        <div class="glass-panel" id="login-panel">
+            <h2 style="color: white; margin-bottom: 20px;">NHẬP MẬT KHẨU</h2>
+            <input type="password" id="password-display" readonly>
+            <div class="keypad">
+                <button class="key" onclick="addNumber(1)">1</button>
+                <button class="key" onclick="addNumber(2)">2</button>
+                <button class="key" onclick="addNumber(3)">3</button>
+                <button class="key" onclick="addNumber(4)">4</button>
+                <button class="key" onclick="addNumber(5)">5</button>
+                <button class="key" onclick="addNumber(6)">6</button>
+                <button class="key" onclick="addNumber(7)">7</button>
+                <button class="key" onclick="addNumber(8)">8</button>
+                <button class="key" onclick="addNumber(9)">9</button>
+                <button class="key" onclick="clearInput()">C</button>
+                <button class="key" onclick="addNumber(0)">0</button>
+                <button class="key" style="font-size: 15px;" onclick="backspace()">⌫</button>
+                <button class="btn-enter" onclick="checkPassword()">ENTER</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-2">
+        <button id="open-gift-btn" onclick="showGiftContent()">🎁 MỞ QUÀ NGAY 🎁</button>
+
+        <div id="gift-modal">
+            <h3 style="color: #ff4757;">Surprise! ❤️</h3>
+            <div class="decorations">
+                <img src="gau.png" alt="Gấu" class="sticker" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712009.png'">
+                
+                <img src="gift.gif" alt="Ảnh Động" class="main-gif" onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDdtY254a3N5ZXR6Y3B6Y3B6Y3B6/26AHONQ79FdWZhAI0/giphy.gif'">
+                
+                <img src="no.png" alt="Nơ" class="sticker" onerror="this.src='https://cdn-icons-png.flaticon.com/512/9370/9370270.png'">
+            </div>
+            <p>Nhấn nút bên dưới để đi tiếp nhé!</p>
+            <button class="next-btn" onclick="goToScreen3()">ENTER ▶</button>
+        </div>
+    </div>
+
+    <div id="screen-3" onclick="revealVideo()">
+        <div id="click-hint">CLICK VÀO MÀN HÌNH ĐỂ XEM ĐIỀU BẤT NGỜ...</div>
+        <div id="video-container">
+            <video controls id="myVideo">
+                <source src="video.mp4" type="video/mp4">
+                Trình duyệt không hỗ trợ video.
+            </video>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGIC MÀN HÌNH 1 ---
+        let currentPass = "";
+        const correctPass = "361867";
+        const display = document.getElementById('password-display');
+        const panel = document.getElementById('login-panel');
+
+        function addNumber(num) {
+            if(currentPass.length < 10) {
+                currentPass += num;
+                display.value = currentPass;
+            }
+        }
+
+        function clearInput() {
+            currentPass = "";
+            display.value = "";
+        }
+
+        function backspace() {
+            currentPass = currentPass.slice(0, -1);
+            display.value = currentPass;
+        }
+
+        function checkPassword() {
+            if (currentPass === correctPass) {
+                // Hiệu ứng đúng: Phát sáng và toả ra
+                panel.classList.add('correct-pass-anim');
+                
+                // Chờ hiệu ứng chạy xong 1s rồi chuyển trang
+                setTimeout(() => {
+                    document.getElementById('screen-1').style.display = 'none';
+                    document.getElementById('screen-2').style.display = 'flex';
+                }, 1000);
+            } else {
+                // Hiệu ứng sai: Rung lắc nhẹ
+                display.style.background = "rgba(255, 0, 0, 0.5)";
+                setTimeout(() => {
+                    display.style.background = "rgba(0, 0, 0, 0.5)";
+                    clearInput();
+                }, 500);
+            }
+        }
+
+        // --- LOGIC MÀN HÌNH 2 ---
+        function showGiftContent() {
+            // Ẩn nút mở quà
+            document.getElementById('open-gift-btn').style.display = 'none';
+            // Hiện bảng trang trí
+            document.getElementById('gift-modal').style.display = 'block';
+            
+            // Hiệu ứng pháo giấy (giả lập đơn giản bằng alert hoặc console nếu muốn, ở đây dùng CSS animation popup)
+        }
+
+        function goToScreen3() {
+            document.getElementById('screen-2').style.display = 'none';
+            document.getElementById('screen-3').style.display = 'flex';
+        }
+
+        // --- LOGIC MÀN HÌNH 3 ---
+        let videoRevealed = false;
+        function revealVideo() {
+            if (!videoRevealed) {
+                document.getElementById('click-hint').style.display = 'none';
+                const vidContainer = document.getElementById('video-container');
+                vidContainer.style.display = 'block';
+                
+                // Tự động phát video
+                const video = document.getElementById('myVideo');
+                video.play();
+                
+                videoRevealed = true;
+            }
+        }
+    </script>
+</body>
+</html>
